@@ -51,6 +51,8 @@ flask run
 5. **Forward Webhooks with smee.io**
 
 Go to smee.io, create a new channel and copy the Webhook Proxy URL
+Go to action-repo or whatever repo you want to track the changes in, go to settings and click "Add Webhook"
+Paste the Webhook Proxy URL from smee in the "Payload URL" field, change the content type to "application/json" and enable push, pull and merge events and click "Add Webhook".
 
 Open another terminal and run the following command to forward GitHub webhook payloads to your locally running application:
 ```bash

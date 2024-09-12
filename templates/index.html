@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GitHub Webhook Events</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2f3339;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #f6ffe1;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative; /* For positioning the spinner */
+            height: 80vh; /* Set a fixed height for the container */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        h1 {
+            color: #444;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-left: 3px solid #007bff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        .loading-message {
+            font-size: 0.9em;
+            color: #007bff;
+            margin-left: 10px;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0 0 0;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #e1e4e8;
+            transition: background-color 0.3s;
+            line-height: 1.5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        li:hover {
+            background-color: #f9f9f9;
+        }
+        .event-type {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .username {
+            font-weight: bold;
+            color: #ff6347;
+        }
+        .branch, .to-branch {
+            font-weight: bold;
+            font-style: italic;
+            color: #555;
+        }
+        .timestamp {
+            font-size: 0.9em;
+            color: #888;
+        }
+        .event-description {
+            margin: 0;
+        }
+    </style>
+
+    <script>
+        let spinnerTimeout;
+        let isInitialLoad = true;  // Keep track if it's the first load
+
+        function loadData() {
+            // Set the query parameter for initial load or subsequent fetches
+            let url = isInitialLoad ? '/events?initial=true' : '/events?initial=false';
+
+            // Show spinner and loading message
+            $('.spinner, .loading-message').show();
+
+            // Start a timeout to hide the spinner after a minimum display time
+            spinnerTimeout = setTimeout(function() {
+                $('.spinner, .loading-message').hide();
+            }, 500);
+
+            // Fetch data
+            $.get(url, function(data) {
+                console.log("Fetched events:", data);
+
+                if (data.length === 0) {
+                    return; // If no new events, do nothing
+                }
+
+                let existingEvents = $('#events').children('li');
+                let existingEventIds = [];
+
+                // Collect IDs of events already displayed
+                existingEvents.each(function() {
+                    existingEventIds.push($(this).attr('data-id'));
+                });
+
+                // Loop through new events and append if not already displayed
+                data.forEach(function(event) {
+                    if (!existingEventIds.includes(event._id)) {
+                        let eventText = '';
+                        let timestamp = new Date(event.timestamp);
+
+                        if (event.type === 'push') {
+                            eventText = `<span class="username">${event.author}</span> pushed to <span class="branch">${event.branch}</span>`;
+                        } else if (event.type === 'pull_request') {
+                            eventText = `<span class="username">${event.author}</span> submitted a pull request from <span class="branch">${event.from_branch}</span> to <span class="to-branch">${event.to_branch}</span>`;
+                        } else if (event.type === 'merge') {
+                            eventText = `<span class="username">${event.author}</span> merged branch <span class="branch">${event.from_branch}</span> to <span class="to-branch">${event.to_branch}</span>`;
+                        }
+
+                        // Append the new event to the list
+                        $('#events').append(`<li data-id="${event._id}">
+                            <span class="event-description">${eventText}</span>
+                            <span class="timestamp">${timestamp.toUTCString()}</span>
+                        </li>`);
+                    }
+                });
+
+                // After the initial load, set to false so that subsequent fetches are 15-second windows
+                isInitialLoad = false;
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Failed to fetch events:", textStatus, errorThrown);
+            }).always(function() {
+                clearTimeout(spinnerTimeout);
+                $('.spinner, .loading-message').hide();
+            });
+        }
+
+        $(document).ready(function() {
+            loadData();  // Load data when page loads
+            setInterval(loadData, 15000);  // Poll every 15 seconds
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>GitHub Webhook Events</h1>
+            <div class="spinner"></div>
+            <div class="loading-message">Loading events...</div>
+        </div>
+        <ul id="events">
+            <!-- Events will be populated here -->
+        </ul>
+    </div>
+</body>
+</html>

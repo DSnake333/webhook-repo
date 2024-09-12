@@ -50,20 +50,28 @@ flask run
 ```
 5. **Forward Webhooks with smee.io**
 
+Go to smee.io, create a new channel and copy the Webhook Proxy URL
+
 Open another terminal and run the following command to forward GitHub webhook payloads to your locally running application:
 ```bash
-smee --url https://smee.io/hFbnaJj3ejllCQ --target http://127.0.0.1:5000/webhook
+smee --url <Webhook Proxy URL> --target <The local address your flask server runs on>/webhook
 ```
 This allows GitHub to send webhook events to your local server, as GitHub does not support localhost URLs for webhooks.
 
 Usage
-Access the web server at http://127.0.0.1:5000 to view the latest events.
+Access the web server at local flask server address (example: http://127.0.0.1:5000) to view the latest events.
 The events endpoint at /events provides a JSON response with all recorded events.
-Notes
+
+*Notes*
+
 Ensure that the webhook-repo contains the necessary code for handling GitHub webhooks.
 The action-repo is used for GitHub actions and does not need specific configuration for this setup.
-Troubleshooting
+
+*Troubleshooting*
+
 If you encounter issues with dependencies or module imports, ensure that the virtual environment is activated and dependencies are installed correctly.
-For issues with smee.io, make sure the URL and target are correctly specified.
-License
+For issues with smee.io, make sure the URL and target are correctly specified. You can contact me if you have any other queries.
+
+**License**
+
 This project is licensed under the MIT License - see the LICENSE file for details.

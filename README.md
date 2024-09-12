@@ -22,34 +22,38 @@ This project tracks GitHub webhook events such as pushes, pull requests, and mer
 2. **Create a Virtual Environment**
 
 Navigate to the webhook-repo directory and create a virtual environment:
-
+```bash
 python -m venv myenv
+```
 Activate the virtual environment:
 
 On Windows:
-
+```bash
 .\myenv\Scripts\activate
+```
 On macOS/Linux:
-
+```bash
 source myenv/bin/activate
+```
 
 3. **Install Dependencies**
 
 Install the required Python packages:
-
+```bash
 pip install -r requirements.txt
-
+```
 4. **Run the Flask Server**
 
 Start the Flask server:
-
+```bash
 flask run
-
+```
 5. **Forward Webhooks with smee.io**
 
 Open another terminal and run the following command to forward GitHub webhook payloads to your locally running application:
-
+```bash
 smee --url https://smee.io/hFbnaJj3ejllCQ --target http://127.0.0.1:5000/webhook
+```
 This allows GitHub to send webhook events to your local server, as GitHub does not support localhost URLs for webhooks.
 
 Usage
